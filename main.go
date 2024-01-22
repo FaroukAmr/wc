@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -9,7 +10,9 @@ import (
 )
 
 func main() {
-	cFlag := flag.Bool("c", false, "c")
+	cFlag := flag.Bool("c", false, "sets the byte count")
+	lFlag := flag.Bool("l", false, "sets the line count")
+
 	flag.Parse()
 	var args []string = flag.Args()
 	fileName, err := handleGetFileName(args)
@@ -40,6 +43,11 @@ func main() {
 			fmt.Println(err)
 		}
 		fmt.Printf("%v %v\n", size, fileName)
+		return
+	}
+	if *lFlag {
+		numberOfLines := handleGetNumberOfLines(file)
+		fmt.Printf("%v %v\n", numberOfLines, fileName)
 		return
 	}
 }
@@ -76,4 +84,13 @@ func handleCountBytes(file *os.File) (int, error) {
 	}
 
 	return len(contents), nil
+}
+
+func handleGetNumberOfLines(file *os.File) int {
+	scanner := bufio.NewScanner(file)
+	var numberOfLines int = 0
+	for scanner.Scan() {
+		numberOfLines++
+	}
+	return numberOfLines
 }
