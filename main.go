@@ -12,6 +12,7 @@ import (
 func main() {
 	cFlag := flag.Bool("c", false, "sets the byte count")
 	lFlag := flag.Bool("l", false, "sets the line count")
+	wFlag := flag.Bool("w", false, "sets the word count")
 
 	flag.Parse()
 	var args []string = flag.Args()
@@ -41,13 +42,27 @@ func main() {
 		size, err := handleCountBytes(file)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
 		fmt.Printf("%v %v\n", size, fileName)
 		return
 	}
 	if *lFlag {
-		numberOfLines := handleGetNumberOfLines(file)
+		numberOfLines, err := handleGetNumberOfLines(file)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		fmt.Printf("%v %v\n", numberOfLines, fileName)
+		return
+	}
+	if *wFlag {
+		numberOfWords, err := handleGetNumberOfWords(file)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("%v %v\n", numberOfWords, fileName)
 		return
 	}
 }
@@ -86,11 +101,28 @@ func handleCountBytes(file *os.File) (int, error) {
 	return len(contents), nil
 }
 
-func handleGetNumberOfLines(file *os.File) int {
+func handleGetNumberOfLines(file *os.File) (int, error) {
 	scanner := bufio.NewScanner(file)
+
+	if scanner.Err() != nil {
+		return 0, fmt.Errorf("error scanning file: %w", scanner.Err())
+	}
 	var numberOfLines int = 0
 	for scanner.Scan() {
 		numberOfLines++
 	}
-	return numberOfLines
+	return numberOfLines, nil
+}
+
+func handleGetNumberOfWords(file *os.File) (int, error) {
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanWords)
+	wordsCount := 0
+	for scanner.Scan() {
+		wordsCount++
+	}
+	if err := scanner.Err(); err != nil {
+		return 0, fmt.Errorf("error reading file: %w", err)
+	}
+	return wordsCount, nil
 }
