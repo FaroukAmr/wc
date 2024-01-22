@@ -31,12 +31,13 @@ func handleCountBytes(args []string){
 			fmt.Println("Error opening file:", err)
 			return
 		}
+		defer file.Close()
+
 		contents,err := io.ReadAll(file)
 		if err!=nil{
 			fmt.Println("Error reading file:", err)
 			return
 		}
-		fmt.Println(len(contents))
-		defer file.Close()
+		fmt.Printf("%v %v\n",len(contents),fileName)
 	}
 }
